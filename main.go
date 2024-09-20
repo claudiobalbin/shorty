@@ -1,11 +1,17 @@
 package main
 
 import (
+	"crypto/sha256"
 	"encoding/json"
 	"fmt"
+
 	"log"
 	"net/http"
 	"sync"
+	"time"
+
+	"github.com/jxskiss/base62"
+	"golang.org/x/exp/rand"
 )
 
 var (
@@ -35,25 +41,28 @@ func shortenURLHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	shortID := generateShortID(longURL)
+	shortURL := generateShortURL(longURL)
 
 	mu.Lock()
-	urlStore[shortID] = longURL
+	urlStore[shortURL] = longURL
 	mu.Unlock()
 
 	response := map[string]string{
-		"short_url": baseURL + shortID,
+		"short_url": baseURL + shortURL,
 	}
+
+	log.Printf("new url: %s", response["short_url"])
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(response)
 }
 
 // Redirect Handler
 func redirectHandler(w http.ResponseWriter, r *http.Request) {
-	shortID := r.URL.Path[len("/"):]
+	shortURL := r.URL.Path[len("/"):]
 
 	mu.RLock()
-	longURL, ok := urlStore[shortID]
+	longURL, ok := urlStore[shortURL]
 	mu.RUnlock()
 
 	if !ok {
@@ -64,10 +73,23 @@ func redirectHandler(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, longURL, http.StatusSeeOther)
 }
 
-// Generate a short ID based on the long URL (for demo purposes)
-func generateShortID(longURL string) string {
-	// Simple hash-based ID generation for demo purposes
-	return fmt.Sprintf("%x", len(longURL)) // Use length of URL as ID
+func generateShortURL(longURL string) string {
+	// Generate a random salt to add entropy
+	rand.Seed(uint64(time.Now().UnixNano()))
+	salt := make([]byte, 8)
+	rand.Read(salt)
+
+	// Combine the long URL and salt
+	input := append([]byte(longURL), salt...)
+
+	// Calculate the SHA-256 hash
+	hash := sha256.Sum256(input)
+
+	// Encode the hash using base62 for a shorter and more readable URL
+	encodedHash := base62.EncodeToString(hash[:])
+
+	// Take the first 8 characters of the encoded hash as the short URL
+	return encodedHash[:8]
 }
 
 func main() {

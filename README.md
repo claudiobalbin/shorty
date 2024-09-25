@@ -15,7 +15,7 @@ go build -o shorty main.go
 # todos
 
 - ~~Change url hash engine to base62;~~
-- Add clean archtecture folder structure;
+- ~~Add clean archtecture folder structure;~~
 - Add persistance (redis/couchbase/etc);
 - ~~Add .env with env-sample;~~
 - Add tests;

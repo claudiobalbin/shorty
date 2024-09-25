@@ -20,9 +20,14 @@ func GetSettings() map[string]string {
 
 	settings := make(map[string]string)
 
-	settings["PORT"] = "8080"
-	if os.Getenv("PORT") != "" {
-		settings["PORT"] = os.Getenv("PORT")
+	settings["PORT"] = os.Getenv("PORT")
+	if settings["PORT"] != "" {
+		settings["PORT"] = "8080"
+	}
+
+	settings["BASE_URL"] = os.Getenv("BASE_URL")
+	if settings["BASE_URL"] != "" {
+		settings["BASE_URL"] = "http://localhost"
 	}
 
 	return settings

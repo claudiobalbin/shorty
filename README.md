@@ -4,7 +4,7 @@ Simple url shortener in Go
 # build
 
 ```sh
-go build -o shorty main.go
+make build
 ```
 
 # run
@@ -12,11 +12,17 @@ go build -o shorty main.go
 ```sh
 ./shorty
 ```
+
+# local test
+```sh
+make local-environment
+```
+
 # todos
 
 - ~~Change url hash engine to base62;~~
 - ~~Add clean archtecture folder structure;~~
-- Add persistance (redis/couchbase/etc);
+- ~~Add persistance (redis/couchbase/etc);~~
 - ~~Add .env with env-sample;~~
 - Add tests;
 - Add docker for tests and publishing;

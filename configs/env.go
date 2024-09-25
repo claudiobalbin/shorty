@@ -30,5 +30,8 @@ func GetSettings() map[string]string {
 		settings["BASE_URL"] = "http://localhost"
 	}
 
+	settings["REDIS_URL"] = os.Getenv("REDIS_URL")
+	settings["REDIS_PASSWORD"] = os.Getenv("REDIS_PASSWORD")
+
 	return settings
 }

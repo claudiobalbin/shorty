@@ -16,8 +16,8 @@ go build -o shorty main.go
 
 - ~~Change url hash engine to base62;~~
 - Add clean archtecture folder structure;
-- Add .env with env-sample;
+- Add persistance (redis/couchbase/etc);
+- ~~Add .env with env-sample;~~
 - Add tests;
 - Add docker for tests and publishing;
-- Add persistance (redis/couchbase/etc);
 - Add badges to README header;

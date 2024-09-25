@@ -4,6 +4,7 @@ import (
 	"crypto/sha256"
 	"encoding/json"
 	"fmt"
+	"shorty/configs"
 
 	"log"
 	"net/http"
@@ -19,7 +20,9 @@ var (
 	mu       sync.RWMutex              // Mutex for concurrent access
 )
 
-const baseURL = "http://localhost:8080/"
+var settings = configs.GetSettings()
+
+const baseURL = "http://localhost"
 
 // URL Shortener Handler
 func shortenURLHandler(w http.ResponseWriter, r *http.Request) {
@@ -48,7 +51,7 @@ func shortenURLHandler(w http.ResponseWriter, r *http.Request) {
 	mu.Unlock()
 
 	response := map[string]string{
-		"short_url": baseURL + shortURL,
+		"short_url": fmt.Sprintf("%s:%s/%s", baseURL, settings["PORT"], shortURL),
 	}
 
 	log.Printf("new url: %s", response["short_url"])
@@ -96,6 +99,6 @@ func main() {
 	http.HandleFunc("/shorten", shortenURLHandler)
 	http.HandleFunc("/", redirectHandler)
 
-	fmt.Println("Starting server on :8080")
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	fmt.Printf("Starting server on :%s", settings["PORT"])
+	log.Fatal(http.ListenAndServe(":"+settings["PORT"], nil))
 }

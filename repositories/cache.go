@@ -1,23 +1,22 @@
-package cache
+package repository
 
 import (
 	"context"
 	"log"
-	"net/url"
-	"regexp"
 	"shorty/configs"
+	"shorty/utils"
 
 	"github.com/go-redis/redis/v8"
 )
 
 var settings = configs.GetSettings()
 
-type CacheService struct {
+type CacheRepository struct {
 	db *redis.Client
 }
 
-func NewCacheService() *CacheService {
-	return &CacheService{
+func NewCacheRepository() *CacheRepository {
+	return &CacheRepository{
 		db: redis.NewClient(&redis.Options{
 			Addr:     settings["REDIS_URL"],
 			Password: settings["REDIS_PASSWORD"],
@@ -26,8 +25,8 @@ func NewCacheService() *CacheService {
 	}
 }
 
-func (c *CacheService) GetUrl(key string) (string, bool) {
-	if !validKey(key) {
+func (c *CacheRepository) GetUrl(key string) (string, bool) {
+	if !utils.ValidKey(key) {
 		return "", false
 	}
 
@@ -39,12 +38,12 @@ func (c *CacheService) GetUrl(key string) (string, bool) {
 	return val, true
 }
 
-func (c *CacheService) SetUrl(key, longUrl string) bool {
-	if !validKey(key) {
+func (c *CacheRepository) SetUrl(key, longUrl string) bool {
+	if !utils.ValidKey(key) {
 		return false
 	}
 
-	if !validURL(longUrl) {
+	if !utils.ValidURL(longUrl) {
 		return false
 	}
 
@@ -56,35 +55,11 @@ func (c *CacheService) SetUrl(key, longUrl string) bool {
 	return true
 }
 
-func validKey(key string) bool {
-	if key == "" || len(key) < 3 {
-		return false
-	}
-
-	return true
-}
-
-func validURL(urlStr string) bool {
-	urlRegex := regexp.MustCompile(`^(http|https)://([\w-]+\.)+[\w-]+/`)
-
-	if !urlRegex.MatchString(urlStr) {
-		return false
-	}
-
-	parsedURL, err := url.Parse(urlStr)
+func (c *CacheRepository) CleanCache(ctx context.Context) (string, bool) {
+	val, err := c.db.FlushAll(ctx).Result()
 	if err != nil {
-		return false
+		log.Fatalf("Error cleaning cache: %v", err)
 	}
 
-	if parsedURL.Scheme != "http" && parsedURL.Scheme != "https" {
-		return false
-	}
-	if parsedURL.Host == "" {
-		return false
-	}
-	if parsedURL.Path == "" {
-		return false
-	}
-
-	return true
+	return val, true
 }

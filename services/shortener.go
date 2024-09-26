@@ -2,6 +2,8 @@ package services
 
 import (
 	"crypto/sha256"
+	"errors"
+	"shorty/utils"
 	"time"
 
 	"github.com/jxskiss/base62"
@@ -15,7 +17,11 @@ func NewShortenerService() *ShortenerService {
 	return &ShortenerService{}
 }
 
-func (s *ShortenerService) GenerateShortURL(longURL string) string {
+func (s *ShortenerService) GenerateShortURL(longURL string) (string, error) {
+	if !utils.ValidURL(longURL) {
+		return "", errors.New("invalid url")
+	}
+
 	// Generate a random salt to add entropy
 	rand.Seed(uint64(time.Now().UnixNano()))
 	salt := make([]byte, 8)
@@ -31,5 +37,5 @@ func (s *ShortenerService) GenerateShortURL(longURL string) string {
 	encodedHash := base62.EncodeToString(hash[:])
 
 	// Take the first 8 characters of the encoded hash as the short URL
-	return encodedHash[:8]
+	return encodedHash[:8], nil
 }

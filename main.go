@@ -1,18 +1,10 @@
 package main
 
 import (
-	"fmt"
-	"shorty/configs"
-	routes "shorty/routes/api"
-
-	"log"
-	"net/http"
+	"shorty/api/app"
 )
 
 func main() {
-	settings := configs.GetSettings()
-	routes.RoutesV1()
-
-	fmt.Printf("Starting server on :%s", settings["PORT"])
-	log.Fatal(http.ListenAndServe(":"+settings["PORT"], nil))
+	app := app.MakeApp()
+	app.Start()
 }

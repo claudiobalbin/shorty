@@ -14,8 +14,21 @@ make build
 ```
 
 # local test
+
+## Unit tests
+```sh
+go test ./tests/unit/
+```
+
+## Integration tests
+
+Start local environment
 ```sh
 make local-environment
+```
+
+```sh
+go test ./tests/integration/
 ```
 
 # todos

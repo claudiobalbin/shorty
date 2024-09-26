@@ -14,13 +14,13 @@ var settings = configs.GetSettings()
 
 type ShortenerRoute struct {
 	ShortenerService services.ShortenerService
-	CacheService     cache.CacheService
+	CacheRepository  cache.CacheRepository
 }
 
 func NewShortenerRoute() *ShortenerRoute {
 	service := &ShortenerRoute{
 		ShortenerService: *services.NewShortenerService(),
-		CacheService:     *cache.NewCacheService(),
+		CacheRepository:  *cache.NewCacheRepository(),
 	}
 
 	return service
@@ -28,9 +28,9 @@ func NewShortenerRoute() *ShortenerRoute {
 
 // Redirect Handler
 func (s *ShortenerRoute) RedirectHandler(w http.ResponseWriter, r *http.Request) {
-	key := r.URL.Path[len("/"):]
+	key := r.URL.Path[len(settings["API_V1"]+"/"):]
 
-	longURL, ok := s.CacheService.GetUrl(key)
+	longURL, ok := s.CacheRepository.GetUrl(key)
 	if !ok {
 		http.NotFound(w, r)
 		return
@@ -59,16 +59,20 @@ func (s *ShortenerRoute) ShortenURLHandler(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	key := s.ShortenerService.GenerateShortURL(longURL)
+	key, err := s.ShortenerService.GenerateShortURL(longURL)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
 
-	ok = s.CacheService.SetUrl(key, longURL)
+	ok = s.CacheRepository.SetUrl(key, longURL)
 	if !ok {
 		http.Error(w, "Error creating short url, please try again later", http.StatusBadRequest)
 		return
 	}
 
 	response := map[string]string{
-		"short_url": fmt.Sprintf("%s:%s/%s", settings["BASE_URL"], settings["PORT"], key),
+		"short_url": fmt.Sprintf("%s:%s%s/%s", settings["BASE_URL"], settings["PORT"], settings["API_V1"], key),
 	}
 
 	log.Printf("new url: %s", response["short_url"])

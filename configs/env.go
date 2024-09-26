@@ -20,6 +20,8 @@ func GetSettings() map[string]string {
 
 	settings := make(map[string]string)
 
+	settings["API_V1"] = "/api/v1"
+
 	settings["PORT"] = os.Getenv("PORT")
 	if settings["PORT"] != "" {
 		settings["PORT"] = "8080"

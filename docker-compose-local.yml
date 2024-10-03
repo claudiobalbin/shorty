@@ -3,4 +3,4 @@ services:
     image: redis:7.4.0
     ports:
       - "6379:6379"
-    command: redis-server --requirepass Redis2024!
+    command: redis-server --requirepass F6JKuEyMqrEiTF8D

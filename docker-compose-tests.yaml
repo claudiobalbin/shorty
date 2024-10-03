@@ -1,0 +1,30 @@
+services:
+
+  redis:
+    image: redis:7.4.0
+    ports:
+      - "6379:6379"
+    command: redis-server --requirepass F6JKuEyMqrEiTF8D
+
+  app-test:
+    build:
+      context: ./
+      dockerfile: tests.Dockerfile
+    environment:
+      - IGNORE_ENVIRONMENT=1
+      - PORT=8080
+      - BASE_URL="http://localhost"
+      - REDIS_URL=redis:6379
+      - REDIS_PASSWORD=F6JKuEyMqrEiTF8D
+    depends_on:
+      - redis
+    command: 
+      [
+        "./scripts/wait-for-it.sh",
+        "redis:6379",
+        "--",
+        "go",
+        "test",
+        "./tests/...",
+        "-v"
+      ]
